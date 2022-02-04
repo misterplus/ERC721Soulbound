@@ -32,7 +32,7 @@ contract ERC721Soulbound is ERC721, BrightIDRegistry {
         for (uint i = 0; i < verifications[_msgSender()].contextIds.length; i++) {
             require(balanceOf(verifications[_msgSender()].contextIds[i]) == 0, "ERC721Soulbound: This BrightID had minted");
         }
-        _mint(_msgSender(), _tokenIdTracker.current());
+        _safeMint(_msgSender(), _tokenIdTracker.current());
         _tokenIdTracker.increment();
     }
 
