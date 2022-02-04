@@ -29,11 +29,34 @@ contract ERC721Soulbound is ERC721, BrightIDRegistry {
      * - the token balance of all contextIds associated with the caller BrightID must be zero.
      */
     function mint() external onlyVerified {
-        for (uint i = 0; i < verifications[_msgSender()].contextIds.length; i++) {
-            require(balanceOf(verifications[_msgSender()].contextIds[i]) == 0, "ERC721Soulbound: This BrightID had minted");
+        for (
+            uint256 i = 0;
+            i < verifications[_msgSender()].contextIds.length;
+            i++
+        ) {
+            require(
+                balanceOf(verifications[_msgSender()].contextIds[i]) == 0,
+                "ERC721Soulbound: This BrightID had minted"
+            );
         }
         _safeMint(_msgSender(), _tokenIdTracker.current());
         _tokenIdTracker.increment();
+    }
+
+    /**
+     * @dev Returns whether address `first` and `second` is associated with the same BrightID.
+     */
+    function _isSameBrightID(address first, address second)
+        internal
+        view
+        returns (bool)
+    {
+        for (uint256 i = 0; i < verifications[first].contextIds.length; i++) {
+            if (verifications[first].contextIds[i] == second) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -53,13 +76,27 @@ contract ERC721Soulbound is ERC721, BrightIDRegistry {
         if (from == address(0)) {
             return;
         }
-        bool same = false;
-        for (uint256 i = 0; i < verifications[from].contextIds.length; i++) {
-            if (verifications[from].contextIds[i] == to) {
-                same = true;
-                break;
-            }
-        }
-        require(same, "ERC721Soulbound: Not linked to the same BrightID");
+        require(_isSameBrightID(from, to), "ERC721Soulbound: Not linked to the same BrightID");
+    }
+
+    /**
+     * @dev Returns whether `spender` is allowed to manage `tokenId`.
+     *
+     * Requirements:
+     *
+     * - `tokenId` must exist.
+     */
+    function _isApprovedOrOwner(address spender, uint256 tokenId)
+        internal
+        view
+        override
+        returns (bool)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721: operator query for nonexistent token"
+        );
+        address owner = ERC721.ownerOf(tokenId);
+        return _isSameBrightID(spender, owner);
     }
 }
