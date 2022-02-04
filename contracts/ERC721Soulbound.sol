@@ -76,7 +76,10 @@ contract ERC721Soulbound is ERC721, BrightIDRegistry {
         if (from == address(0)) {
             return;
         }
-        require(_isSameBrightID(from, to), "ERC721Soulbound: Not linked to the same BrightID");
+        require(
+            _isSameBrightID(from, to),
+            "ERC721Soulbound: Not linked to the same BrightID"
+        );
     }
 
     /**
