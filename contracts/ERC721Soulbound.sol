@@ -120,6 +120,10 @@ contract ERC721Soulbound is Context, Ownable, ERC721 {
         uint256 tokenId
     ) internal virtual override {
         super._beforeTokenTransfer(from, to, tokenId);
+        // Ignore transfers during minting
+        if (from == address(0)) {
+            return;
+        }
         bool same = false;
         for (uint i = 0; i < verifications[from].addrs.length; i++) {
             if (verifications[from].addrs[i] == to) {
