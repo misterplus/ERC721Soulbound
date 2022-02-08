@@ -8,7 +8,7 @@ contract BrightIDRegistry is Ownable {
     // BrightID Verification data
     struct Verification {
         uint256 time;
-        address[] contextIds;
+        bytes32 message;
     }
 
     // Contract address of verifier token
@@ -19,6 +19,9 @@ contract BrightIDRegistry is Ownable {
 
     // Mapping address to the according verification data
     mapping(address => Verification) internal verifications;
+
+    // Mapping verification data to the member addresses
+    mapping(bytes32 => address[]) internal members;
 
     /**
      * @dev Emitted when `_verifierToken` is set to `verifierToken`.
@@ -34,7 +37,10 @@ contract BrightIDRegistry is Ownable {
      * @dev Throws if caller is not verified.
      */
     modifier onlyVerified() {
-        require(verifications[_msgSender()].time > 0, "BrightIDRegistry: caller is not verified");
+        require(
+            verifications[_msgSender()].time > 0,
+            "BrightIDRegistry: caller is not verified"
+        );
         _;
     }
 
@@ -87,7 +93,7 @@ contract BrightIDRegistry is Ownable {
      * @param s Component of signature
      */
     function register(
-        address[] memory contextIds,
+        address[] calldata contextIds,
         uint256 timestamp,
         uint8 v,
         bytes32 r,
@@ -107,9 +113,10 @@ contract BrightIDRegistry is Ownable {
             "BrightIDRegistry: Signer is not authorized"
         );
 
+        members[message] = contextIds;
         for (uint256 i = 0; i < contextIds.length; i++) {
             verifications[contextIds[i]].time = timestamp;
-            verifications[contextIds[i]].contextIds = contextIds;
+            verifications[contextIds[i]].message = message;
         }
     }
 
@@ -118,5 +125,16 @@ contract BrightIDRegistry is Ownable {
      */
     function isVerified(address contextId) external view returns (bool) {
         return verifications[contextId].time > 0;
+    }
+
+    /**
+     * @dev Returns whether address `first` and `second` is associated with the same BrightID.
+     */
+    function _isSameBrightID(address first, address second)
+        internal
+        view
+        returns (bool)
+    {
+        return verifications[first].message == verifications[second].message;
     }
 }
