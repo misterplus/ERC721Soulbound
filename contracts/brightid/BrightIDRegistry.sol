@@ -135,6 +135,8 @@ contract BrightIDRegistry is Ownable {
         view
         returns (bool)
     {
-        return verifications[first].message == verifications[second].message;
+        return
+            verifications[first].time > 0 &&
+            verifications[first].message == verifications[second].message;
     }
 }
