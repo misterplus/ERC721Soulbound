@@ -43,6 +43,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
      * Requirements:
      *
      * - `uuid` must be unbounded.
+     * - `owner` must be unbounded.
      * - `signature` must be a valid ETH signed signature.
      * - the signer of `signature` must be `owner`.
      *
@@ -60,6 +61,10 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         require(
             uuidToAddress[uuid] == address(0),
             "BrightIDRegistryOwnership: UUID already bounded"
+        );
+        require(
+            addressToUuid[owner] == bytes16(0),
+            "BrightIDRegistryOwnership: Address already bounded"
         );
         address signer = getUUIDHash(owner, uuid, nonce)
             .toEthSignedMessageHash()
