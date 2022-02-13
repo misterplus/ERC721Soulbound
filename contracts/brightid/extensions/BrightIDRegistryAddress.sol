@@ -1,22 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "./../BrightIDRegistryBase.sol";
 
-contract BrightIDRegistry is Ownable {
-    // BrightID Verification data
-    struct Verification {
-        uint256 time;
-        bytes32 message;
-    }
-
-    // Contract address of verifier token
-    IERC20 private _verifierToken;
-
-    // Context of BrightID app
-    bytes32 private _context;
-
+/**
+ * @dev Hex address based implementation of {BrightIDRegistryBase}.
+ */
+contract BrightIDRegistryAddress is BrightIDRegistryBase {
     // Mapping address to the according verification data
     mapping(address => Verification) internal verifications;
 
@@ -24,58 +14,19 @@ contract BrightIDRegistry is Ownable {
     mapping(bytes32 => address[]) internal members;
 
     /**
-     * @dev Emitted when `_verifierToken` is set to `verifierToken`.
-     */
-    event VerifierTokenSet(IERC20 verifierToken);
-
-    /**
-     * @dev Emitted when `_context` is set to `context`.
-     */
-    event ContextSet(bytes32 context);
-
-    /**
      * @dev Throws if caller is not verified.
      */
     modifier onlyVerified() {
         require(
             verifications[_msgSender()].time > 0,
-            "BrightIDRegistry: caller is not verified"
+            "BrightIDRegistryAddress: caller is not verified"
         );
         _;
     }
 
-    constructor(IERC20 verifierToken, bytes32 context) {
-        _verifierToken = verifierToken;
-        _context = context;
-    }
-
-    /**
-     * @dev Set `_context` to `context`.
-     *
-     * Requirements:
-     *
-     * - the caller must be the owner.
-     *
-     * Emits a {ContextSet} event.
-     */
-    function setContext(bytes32 context) external onlyOwner {
-        _context = context;
-        emit ContextSet(context);
-    }
-
-    /**
-     * @dev Set `_verifierToken` to `verifierToken`.
-     *
-     * Requirements:
-     *
-     * - the caller must be the owner.
-     *
-     * Emits a {VerifierTokenSet} event.
-     */
-    function setVerifierToken(IERC20 verifierToken) external onlyOwner {
-        _verifierToken = verifierToken;
-        emit VerifierTokenSet(verifierToken);
-    }
+    constructor(IERC20 verifierToken, bytes32 context)
+        BrightIDRegistryBase(verifierToken, context)
+    {}
 
     /**
      * @dev Register BrightID verification data.
@@ -101,7 +52,7 @@ contract BrightIDRegistry is Ownable {
     ) external {
         require(
             verifications[contextIds[0]].time < timestamp,
-            "BrightIDRegistry: Newer verification registered before"
+            "BrightIDRegistryAddress: Newer verification registered before"
         );
 
         bytes32 message = keccak256(
@@ -110,7 +61,7 @@ contract BrightIDRegistry is Ownable {
         address signer = ecrecover(message, v, r, s);
         require(
             _verifierToken.balanceOf(signer) > 0,
-            "BrightIDRegistry: Signer is not authorized"
+            "BrightIDRegistryAddress: Signer is not authorized"
         );
 
         members[message] = contextIds;
@@ -121,18 +72,19 @@ contract BrightIDRegistry is Ownable {
     }
 
     /**
-     * @dev Returns `true` if `contextId` has been registered
+     * @dev See {BrightIDRegistryBase-isVerified}.
      */
-    function isVerified(address contextId) external view returns (bool) {
-        return verifications[contextId].time > 0;
+    function isVerified(address addr) external view override returns (bool) {
+        return verifications[addr].time > 0;
     }
 
     /**
-     * @dev Returns whether address `first` and `second` is associated with the same BrightID.
+     * @dev See {BrightIDRegistryBase-_isSameBrightID}.
      */
     function _isSameBrightID(address first, address second)
         internal
         view
+        override
         returns (bool)
     {
         return

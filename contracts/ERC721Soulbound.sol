@@ -3,15 +3,15 @@ pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./brightid/BrightIDRegistry.sol";
+import "./brightid/extensions/BrightIDRegistryAddress.sol";
 
-contract ERC721Soulbound is ERC721, BrightIDRegistry {
+contract ERC721Soulbound is ERC721, BrightIDRegistryAddress {
     constructor(
         IERC20 verifierToken,
         bytes32 context,
         string memory name,
         string memory symbol
-    ) ERC721(name, symbol) BrightIDRegistry(verifierToken, context) {}
+    ) ERC721(name, symbol) BrightIDRegistryAddress(verifierToken, context) {}
 
     /**
      * @dev See {ERC721-_beforeTokenTransfer}.
