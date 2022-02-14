@@ -2,11 +2,15 @@
 pragma solidity ^0.8.11;
 
 import "./../BrightIDRegistryBase.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @dev Hex address based implementation of {BrightIDRegistryBase}.
  */
 contract BrightIDRegistryAddress is BrightIDRegistryBase {
+
+    using ECDSA for bytes32;
+
     constructor(IERC20 verifierToken, bytes32 context)
         BrightIDRegistryBase(verifierToken, context)
     {}
@@ -41,7 +45,7 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
         bytes32 message = keccak256(
             abi.encodePacked(_context, contextIds, timestamp)
         );
-        address signer = ecrecover(message, v, r, s);
+        address signer = message.recover(v, r, s);
         require(
             _verifierToken.balanceOf(signer) > 0,
             "BrightIDRegistryAddress: Signer is not authorized"

@@ -89,7 +89,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         bytes32 message = keccak256(
             abi.encodePacked(_context, contextIds, timestamp)
         );
-        address signer = ecrecover(message, v, r, s);
+        address signer = message.recover(v, r, s);
         require(
             _verifierToken.balanceOf(signer) > 0,
             "BrightIDRegistryOwnership: Signer is not authorized"
