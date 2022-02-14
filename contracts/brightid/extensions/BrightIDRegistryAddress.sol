@@ -49,6 +49,7 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
         for (uint256 i = 0; i < contextIds.length; i++) {
             _verifications[contextIds[i]] = message;
         }
-        _contents[message] = Verification(timestamp, contextIds);
+        _contents[message].time = timestamp;
+        _contents[message].members = contextIds;
     }
 }

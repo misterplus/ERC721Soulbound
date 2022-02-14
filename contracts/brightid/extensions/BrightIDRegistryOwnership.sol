@@ -101,10 +101,8 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
             _verifierToken.balanceOf(signer) > 0,
             "BrightIDRegistryOwnership: Signer is not authorized"
         );        
-        _contents[message] = Verification(
-                timestamp,
-                new address[](contextIds.length)
-            );
+        _contents[message].time = timestamp;
+        _contents[message].members = new address[](contextIds.length);
         address addr;
         for (uint256 i = 0; i < contextIds.length; i++) {
             addr = _uuidToAddress[contextIds[i]];
