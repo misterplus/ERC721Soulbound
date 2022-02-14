@@ -15,13 +15,15 @@ abstract contract ERC721SoulboundSingleMint is ERC721Soulbound {
      * - the token balance of all contextIds associated with the caller BrightID must be zero.
      */
     function mint(uint256 tokenId) external onlyVerified {
-        address[] memory members = _getMembers(_msgSender());
+        address[] storage members = _getMembers(_msgSender());
+        uint256 balance;
         for (uint256 i = 0; i < members.length; i++) {
-            require(
-                balanceOf(members[i]) == 0,
-                "ERC721SoulboundSingleMint: This BrightID had minted"
-            );
+            balance += ERC721.balanceOf(members[i]);
         }
+        require(
+            balance == 0,
+            "ERC721SoulboundSingleMint: This BrightID had minted"
+        );
         _safeMint(_msgSender(), tokenId);
     }
 }

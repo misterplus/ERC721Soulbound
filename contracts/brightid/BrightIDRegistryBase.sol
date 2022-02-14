@@ -8,7 +8,7 @@ abstract contract BrightIDRegistryBase is Ownable {
     // BrightID Verification data
     struct Verification {
         uint256 time;
-        bytes32 message;
+        address[] members;
     }
 
     // Contract address of verifier token
@@ -17,11 +17,11 @@ abstract contract BrightIDRegistryBase is Ownable {
     // Context of BrightID app
     bytes32 internal _context;
 
-    // Mapping address to the according verification data
-    mapping(address => Verification) internal _verifications;
+    // Mapping address to packed verification data
+    mapping(address => bytes32) internal _verifications;
 
-    // Mapping verification data to the member addresses
-    mapping(bytes32 => address[]) internal _members;
+    // Mapping packed verification data to unpacked contents
+    mapping(bytes32 => Verification) internal _contents;
 
     /**
      * @dev Emitted when `_verifierToken` is set to `verifierToken`.
@@ -38,7 +38,7 @@ abstract contract BrightIDRegistryBase is Ownable {
      */
     modifier onlyVerified() {
         require(
-            _verifications[_msgSender()].time > 0,
+            _verifications[_msgSender()] != bytes32(0),
             "BrightIDRegistryOwnership: caller is not verified"
         );
         _;
@@ -81,7 +81,7 @@ abstract contract BrightIDRegistryBase is Ownable {
      * @dev Returns `true` if `addr` has been registered.
      */
     function isVerified(address addr) external view returns (bool) {
-        return _verifications[addr].time > 0;
+        return _verifications[addr] != bytes32(0);
     }
 
     /**
@@ -93,8 +93,8 @@ abstract contract BrightIDRegistryBase is Ownable {
         returns (bool)
     {
         return
-            _verifications[first].time > 0 &&
-            _verifications[first].message == _verifications[second].message;
+            _verifications[first] != bytes32(0) &&
+            _verifications[first] == _verifications[second];
     }
 
     /**
@@ -103,8 +103,8 @@ abstract contract BrightIDRegistryBase is Ownable {
     function _getMembers(address addr)
         internal
         view
-        returns (address[] memory)
+        returns (address[] storage)
     {
-        return _members[_verifications[addr].message];
+        return _contents[_verifications[addr]].members;
     }
 }

@@ -88,7 +88,8 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         bytes32 s
     ) external {
         require(
-            _verifications[_uuidToAddress[contextIds[0]]].time < timestamp,
+            _contents[_verifications[_uuidToAddress[contextIds[0]]]].time <
+                timestamp,
             "BrightIDRegistryOwnership: Newer verification registered before"
         );
 
@@ -99,19 +100,20 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         require(
             _verifierToken.balanceOf(signer) > 0,
             "BrightIDRegistryOwnership: Signer is not authorized"
-        );
-
-        _members[message] = new address[](contextIds.length);
+        );        
+        _contents[message] = Verification(
+                timestamp,
+                new address[](contextIds.length)
+            );
+        address addr;
         for (uint256 i = 0; i < contextIds.length; i++) {
+            addr = _uuidToAddress[contextIds[i]];
             require(
-                _uuidToAddress[contextIds[i]] != address(0),
+                addr != address(0),
                 "BrightIDRegistryOwnership: UUID is unbounded"
             );
-            _members[message][i] = _uuidToAddress[contextIds[i]];
-            _verifications[_uuidToAddress[contextIds[i]]] = Verification(
-                timestamp,
-                message
-            );
+            _contents[message].members[i] = addr;
+            _verifications[addr] = message;
         }
     }
 

@@ -34,7 +34,7 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
         bytes32 s
     ) external {
         require(
-            _verifications[contextIds[0]].time < timestamp,
+            _contents[_verifications[contextIds[0]]].time < timestamp,
             "BrightIDRegistryAddress: Newer verification registered before"
         );
 
@@ -46,11 +46,9 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
             _verifierToken.balanceOf(signer) > 0,
             "BrightIDRegistryAddress: Signer is not authorized"
         );
-
-        _members[message] = contextIds;
         for (uint256 i = 0; i < contextIds.length; i++) {
-            _verifications[contextIds[i]].time = timestamp;
-            _verifications[contextIds[i]].message = message;
+            _verifications[contextIds[i]] = message;
         }
+        _contents[message] = Verification(timestamp, contextIds);
     }
 }
