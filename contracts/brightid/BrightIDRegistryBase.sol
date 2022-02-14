@@ -39,7 +39,7 @@ abstract contract BrightIDRegistryBase is Ownable {
     modifier onlyVerified() {
         require(
             _verifications[_msgSender()] != bytes32(0),
-            "BrightIDRegistryOwnership: caller is not verified"
+            "BrightIDRegistryOwnership: caller not verified"
         );
         _;
     }

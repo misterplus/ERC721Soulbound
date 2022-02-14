@@ -92,7 +92,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         address signer = message.recover(v, r, s);
         require(
             _verifierToken.balanceOf(signer) > 0,
-            "BrightIDRegistryOwnership: Signer is not authorized"
+            "BrightIDRegistryOwnership: Signer not authorized"
         );
         _contents[message].time = timestamp;
         _contents[message].members = new address[](contextIds.length);
@@ -101,7 +101,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
             addr = _uuidToAddress[contextIds[i]];
             require(
                 addr != address(0),
-                "BrightIDRegistryOwnership: UUID is unbounded"
+                "BrightIDRegistryOwnership: UUID unbounded"
             );
             _contents[message].members[i] = addr;
             _verifications[addr] = message;

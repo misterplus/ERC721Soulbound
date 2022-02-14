@@ -48,7 +48,7 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
         address signer = message.recover(v, r, s);
         require(
             _verifierToken.balanceOf(signer) > 0,
-            "BrightIDRegistryAddress: Signer is not authorized"
+            "BrightIDRegistryAddress: Signer not authorized"
         );
         for (uint256 i = 0; i < contextIds.length; i++) {
             _verifications[contextIds[i]] = message;
