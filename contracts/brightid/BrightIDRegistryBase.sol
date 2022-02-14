@@ -17,6 +17,12 @@ abstract contract BrightIDRegistryBase is Ownable {
     // Context of BrightID app
     bytes32 internal _context;
 
+    // Mapping address to the according verification data
+    mapping(address => Verification) internal _verifications;
+
+    // Mapping verification data to the member addresses
+    mapping(bytes32 => address[]) internal _members;
+
     /**
      * @dev Emitted when `_verifierToken` is set to `verifierToken`.
      */
@@ -26,6 +32,17 @@ abstract contract BrightIDRegistryBase is Ownable {
      * @dev Emitted when `_context` is set to `context`.
      */
     event ContextSet(bytes32 context);
+
+    /**
+     * @dev Throws if caller is not verified.
+     */
+    modifier onlyVerified() {
+        require(
+            _verifications[_msgSender()].time > 0,
+            "BrightIDRegistryOwnership: caller is not verified"
+        );
+        _;
+    }
 
     constructor(IERC20 verifierToken, bytes32 context) {
         _verifierToken = verifierToken;
@@ -63,7 +80,9 @@ abstract contract BrightIDRegistryBase is Ownable {
     /**
      * @dev Returns `true` if `addr` has been registered.
      */
-    function isVerified(address addr) external view virtual returns (bool);
+    function isVerified(address addr) external view returns (bool) {
+        return _verifications[addr].time > 0;
+    }
 
     /**
      * @dev Returns whether address `first` and `second` is associated with the same BrightID.
@@ -71,6 +90,21 @@ abstract contract BrightIDRegistryBase is Ownable {
     function _isSameBrightID(address first, address second)
         internal
         view
-        virtual
-        returns (bool);
+        returns (bool)
+    {
+        return
+            _verifications[first].time > 0 &&
+            _verifications[first].message == _verifications[second].message;
+    }
+
+    /**
+     * @dev Returns an array of addresses associated with the same BrightID as `addr`.
+     */
+    function _getMembers(address addr)
+        internal
+        view
+        returns (address[] memory)
+    {
+        return _members[_verifications[addr].message];
+    }
 }

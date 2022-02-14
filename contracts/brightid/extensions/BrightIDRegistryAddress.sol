@@ -7,23 +7,6 @@ import "./../BrightIDRegistryBase.sol";
  * @dev Hex address based implementation of {BrightIDRegistryBase}.
  */
 contract BrightIDRegistryAddress is BrightIDRegistryBase {
-    // Mapping address to the according verification data
-    mapping(address => Verification) internal verifications;
-
-    // Mapping verification data to the member addresses
-    mapping(bytes32 => address[]) internal members;
-
-    /**
-     * @dev Throws if caller is not verified.
-     */
-    modifier onlyVerified() {
-        require(
-            verifications[_msgSender()].time > 0,
-            "BrightIDRegistryAddress: caller is not verified"
-        );
-        _;
-    }
-
     constructor(IERC20 verifierToken, bytes32 context)
         BrightIDRegistryBase(verifierToken, context)
     {}
@@ -51,7 +34,7 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
         bytes32 s
     ) external {
         require(
-            verifications[contextIds[0]].time < timestamp,
+            _verifications[contextIds[0]].time < timestamp,
             "BrightIDRegistryAddress: Newer verification registered before"
         );
 
@@ -64,31 +47,10 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
             "BrightIDRegistryAddress: Signer is not authorized"
         );
 
-        members[message] = contextIds;
+        _members[message] = contextIds;
         for (uint256 i = 0; i < contextIds.length; i++) {
-            verifications[contextIds[i]].time = timestamp;
-            verifications[contextIds[i]].message = message;
+            _verifications[contextIds[i]].time = timestamp;
+            _verifications[contextIds[i]].message = message;
         }
-    }
-
-    /**
-     * @dev See {BrightIDRegistryBase-isVerified}.
-     */
-    function isVerified(address addr) external view override returns (bool) {
-        return verifications[addr].time > 0;
-    }
-
-    /**
-     * @dev See {BrightIDRegistryBase-_isSameBrightID}.
-     */
-    function _isSameBrightID(address first, address second)
-        internal
-        view
-        override
-        returns (bool)
-    {
-        return
-            verifications[first].time > 0 &&
-            verifications[first].message == verifications[second].message;
     }
 }

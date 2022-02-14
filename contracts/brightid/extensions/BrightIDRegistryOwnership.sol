@@ -10,28 +10,11 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 contract BrightIDRegistryOwnership is BrightIDRegistryBase {
     using ECDSA for bytes32;
 
-    // Mapping uuid to the according verification data
-    mapping(bytes16 => Verification) internal verifications;
-
-    // Mapping verification data to the member uuids
-    mapping(bytes32 => bytes16[]) internal members;
-
     // Mapping UUID to address
-    mapping(bytes16 => address) internal uuidToAddress;
+    mapping(bytes16 => address) internal _uuidToAddress;
 
     // Mapping address to UUID
-    mapping(address => bytes16) internal addressToUuid;
-
-    /**
-     * @dev Throws if caller is not verified.
-     */
-    modifier onlyVerified() {
-        require(
-            verifications[addressToUuid[_msgSender()]].time > 0,
-            "BrightIDRegistryOwnership: caller is not verified"
-        );
-        _;
-    }
+    mapping(address => bytes16) internal _addressToUuid;
 
     constructor(IERC20 verifierToken, bytes32 context)
         BrightIDRegistryBase(verifierToken, context)
@@ -59,11 +42,11 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         bytes calldata signature
     ) external {
         require(
-            uuidToAddress[uuid] == address(0),
+            _uuidToAddress[uuid] == address(0),
             "BrightIDRegistryOwnership: UUID already bounded"
         );
         require(
-            addressToUuid[owner] == bytes16(0),
+            _addressToUuid[owner] == bytes16(0),
             "BrightIDRegistryOwnership: Address already bounded"
         );
         address signer = getUUIDHash(owner, uuid, nonce)
@@ -77,8 +60,8 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
             signer == owner,
             "BrightIDRegistryOwnership: Signature not owned by signer"
         );
-        uuidToAddress[uuid] = owner;
-        addressToUuid[owner] = uuid;
+        _uuidToAddress[uuid] = owner;
+        _addressToUuid[owner] = uuid;
     }
 
     /**
@@ -105,7 +88,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         bytes32 s
     ) external {
         require(
-            verifications[contextIds[0]].time < timestamp,
+            _verifications[_uuidToAddress[contextIds[0]]].time < timestamp,
             "BrightIDRegistryOwnership: Newer verification registered before"
         );
 
@@ -118,19 +101,18 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
             "BrightIDRegistryOwnership: Signer is not authorized"
         );
 
-        members[message] = contextIds;
+        _members[message] = new address[](contextIds.length);
         for (uint256 i = 0; i < contextIds.length; i++) {
-            require(uuidToAddress[contextIds[i]] != address(0), "BrightIDRegistryOwnership: UUID is unbounded");
-            verifications[contextIds[i]].time = timestamp;
-            verifications[contextIds[i]].message = message;
+            require(
+                _uuidToAddress[contextIds[i]] != address(0),
+                "BrightIDRegistryOwnership: UUID is unbounded"
+            );
+            _members[message][i] = _uuidToAddress[contextIds[i]];
+            _verifications[_uuidToAddress[contextIds[0]]] = Verification(
+                timestamp,
+                message
+            );
         }
-    }
-
-    /**
-     * @dev See {BrightIDRegistryBase-isVerified}.
-     */
-    function isVerified(address addr) external view override returns (bool) {
-        return verifications[addressToUuid[addr]].time > 0;
     }
 
     /**
@@ -146,20 +128,5 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         uint256 nonce
     ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(owner, uuid, nonce));
-    }
-
-    /**
-     * @dev See {BrightIDRegistryBase-_isSameBrightID}.
-     */
-    function _isSameBrightID(address first, address second)
-        internal
-        view
-        override
-        returns (bool)
-    {
-        return
-            verifications[addressToUuid[first]].time > 0 &&
-            verifications[addressToUuid[first]].message ==
-            verifications[addressToUuid[second]].message;
     }
 }

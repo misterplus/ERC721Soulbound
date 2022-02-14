@@ -4,7 +4,6 @@ pragma solidity ^0.8.11;
 import "../ERC721Soulbound.sol";
 
 abstract contract ERC721SoulboundSingleMint is ERC721Soulbound {
-
     /**
      * @dev Creates a new token for the caller.
      *
@@ -16,13 +15,10 @@ abstract contract ERC721SoulboundSingleMint is ERC721Soulbound {
      * - the token balance of all contextIds associated with the caller BrightID must be zero.
      */
     function mint(uint256 tokenId) external onlyVerified {
-        for (
-            uint256 i = 0;
-            i < members[verifications[_msgSender()].message].length;
-            i++
-        ) {
+        address[] memory members = _getMembers(_msgSender());
+        for (uint256 i = 0; i < members.length; i++) {
             require(
-                balanceOf(members[verifications[_msgSender()].message][i]) == 0,
+                balanceOf(members[i]) == 0,
                 "ERC721SoulboundSingleMint: This BrightID had minted"
             );
         }
