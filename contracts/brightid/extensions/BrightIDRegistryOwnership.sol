@@ -42,23 +42,16 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         bytes calldata signature
     ) external {
         require(
-            _uuidToAddress[uuid] == address(0),
-            "BrightIDRegistryOwnership: UUID already bounded"
-        );
-        require(
-            _addressToUuid[owner] == bytes16(0),
-            "BrightIDRegistryOwnership: Address already bounded"
+            _uuidToAddress[uuid] == address(0) &&
+                _addressToUuid[owner] == bytes16(0),
+            "BrightIDRegistryOwnership: UUID or address already bounded"
         );
         address signer = getUUIDHash(owner, uuid, nonce)
             .toEthSignedMessageHash()
             .recover(signature);
         require(
-            signer != address(0),
-            "BrightIDRegistryOwnership: Unable to recover signer"
-        );
-        require(
-            signer == owner,
-            "BrightIDRegistryOwnership: Signature not owned by signer"
+            signer != address(0) && signer == owner,
+            "BrightIDRegistryOwnership: Signature invalid"
         );
         _uuidToAddress[uuid] = owner;
         _addressToUuid[owner] = uuid;
@@ -100,7 +93,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         require(
             _verifierToken.balanceOf(signer) > 0,
             "BrightIDRegistryOwnership: Signer is not authorized"
-        );        
+        );
         _contents[message].time = timestamp;
         _contents[message].members = new address[](contextIds.length);
         address addr;
