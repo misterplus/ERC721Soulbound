@@ -89,6 +89,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
      * - `timestamp` must be greater than the previous timestamp.
      * - the signature must be valid under the context `_context`.
      * - the signature must be signed by a valid node.
+     * - `contextIds` must all be bounded.
      *
      * @param contextIds History of contextIds used by this user under the context `_context`
      * @param timestamp Verification timestamp
@@ -119,6 +120,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
 
         members[message] = contextIds;
         for (uint256 i = 0; i < contextIds.length; i++) {
+            require(uuidToAddress[contextIds[i]] != address(0), "BrightIDRegistryOwnership: UUID is unbounded");
             verifications[contextIds[i]].time = timestamp;
             verifications[contextIds[i]].message = message;
         }
