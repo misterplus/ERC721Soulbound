@@ -108,7 +108,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
                 "BrightIDRegistryOwnership: UUID is unbounded"
             );
             _members[message][i] = _uuidToAddress[contextIds[i]];
-            _verifications[_uuidToAddress[contextIds[0]]] = Verification(
+            _verifications[_uuidToAddress[contextIds[i]]] = Verification(
                 timestamp,
                 message
             );
