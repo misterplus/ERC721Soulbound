@@ -21,12 +21,12 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
     {}
 
     /**
-     * @dev Bound an address to an UUID.
+     * @dev Bind an address to an UUID.
      *
      * Requirements:
      *
-     * - `uuid` must be unbounded.
-     * - `owner` must be unbounded.
+     * - `uuid` must be not bound.
+     * - `owner` must be not bound.
      * - `signature` must be a valid ETH signed signature.
      * - the signer of `signature` must be `owner`.
      *
@@ -35,7 +35,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
      * @param nonce Generated nonce
      * @param signature Signed packed data
      */
-    function bound(
+    function bind(
         address owner,
         bytes16 uuid,
         uint256 nonce,
@@ -44,7 +44,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         require(
             _uuidToAddress[uuid] == address(0) &&
                 _addressToUuid[owner] == bytes16(0),
-            "BrightIDRegistryOwnership: UUID or address already bounded"
+            "BrightIDRegistryOwnership: UUID or address already bound"
         );
         address signer = getUUIDHash(owner, uuid, nonce)
             .toEthSignedMessageHash()
@@ -65,7 +65,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
      * - `timestamp` must be greater than the previous timestamp.
      * - the signature must be valid under the context `_context`.
      * - the signature must be signed by a valid node.
-     * - `contextIds` must all be bounded.
+     * - `contextIds` must all be bound.
      *
      * @param contextIds History of contextIds used by this user under the context `_context`
      * @param timestamp Verification timestamp
@@ -101,7 +101,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
             addr = _uuidToAddress[contextIds[i]];
             require(
                 addr != address(0),
-                "BrightIDRegistryOwnership: UUID unbounded"
+                "BrightIDRegistryOwnership: UUID not bound"
             );
             _contents[message].members[i] = addr;
             _verifications[addr] = message;
