@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @dev Hex address based implementation of {BrightIDRegistryBase}.
+ * 
+ * @notice UUID based implementation should be preferred due to the unique nature of context ids, see {BrightIDRegistryOwnership}.
  */
 contract BrightIDRegistryAddress is BrightIDRegistryBase {
 
