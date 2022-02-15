@@ -16,8 +16,8 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
     // Mapping address to UUID
     mapping(address => bytes16) internal _addressToUuid;
 
-    constructor(IERC20 verifierToken, bytes32 context)
-        BrightIDRegistryBase(verifierToken, context)
+    constructor(address verifier, bytes32 context)
+        BrightIDRegistryBase(verifier, context)
     {}
 
     /**
@@ -91,7 +91,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         );
         address signer = message.recover(v, r, s);
         require(
-            _verifierToken.balanceOf(signer) > 0,
+            _verifier == signer,
             "BrightIDRegistryOwnership: Signer not authorized"
         );
         _contents[message].time = timestamp;

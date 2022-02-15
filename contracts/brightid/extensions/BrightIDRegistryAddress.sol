@@ -13,8 +13,8 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
 
     using ECDSA for bytes32;
 
-    constructor(IERC20 verifierToken, bytes32 context)
-        BrightIDRegistryBase(verifierToken, context)
+    constructor(address verifier, bytes32 context)
+        BrightIDRegistryBase(verifier, context)
     {}
 
     /**
@@ -49,7 +49,7 @@ contract BrightIDRegistryAddress is BrightIDRegistryBase {
         );
         address signer = message.recover(v, r, s);
         require(
-            _verifierToken.balanceOf(signer) > 0,
+            _verifier == signer,
             "BrightIDRegistryAddress: Signer not authorized"
         );
         for (uint256 i = 0; i < contextIds.length; i++) {

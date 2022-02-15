@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract BrightIDRegistryBase is Ownable {
@@ -11,8 +10,8 @@ abstract contract BrightIDRegistryBase is Ownable {
         address[] members;
     }
 
-    // Contract address of verifier token
-    IERC20 internal _verifierToken;
+    // Address of trusted verifier
+    address internal _verifier;
 
     // Context of BrightID app
     bytes32 internal _context;
@@ -24,9 +23,9 @@ abstract contract BrightIDRegistryBase is Ownable {
     mapping(bytes32 => Verification) internal _contents;
 
     /**
-     * @dev Emitted when `_verifierToken` is set to `verifierToken`.
+     * @dev Emitted when `_verifier` is set to `verifier`.
      */
-    event VerifierTokenSet(IERC20 verifierToken);
+    event VerifierSet(address verifier);
 
     /**
      * @dev Emitted when `_context` is set to `context`.
@@ -44,8 +43,8 @@ abstract contract BrightIDRegistryBase is Ownable {
         _;
     }
 
-    constructor(IERC20 verifierToken, bytes32 context) {
-        _verifierToken = verifierToken;
+    constructor(address verifier, bytes32 context) {
+        _verifier = verifier;
         _context = context;
     }
 
@@ -64,17 +63,17 @@ abstract contract BrightIDRegistryBase is Ownable {
     }
 
     /**
-     * @dev Set `_verifierToken` to `verifierToken`.
+     * @dev Set `_verifier` to `verifier`.
      *
      * Requirements:
      *
      * - the caller must be the owner.
      *
-     * Emits a {VerifierTokenSet} event.
+     * Emits a {VerifierSet} event.
      */
-    function setVerifierToken(IERC20 verifierToken) external onlyOwner {
-        _verifierToken = verifierToken;
-        emit VerifierTokenSet(verifierToken);
+    function setVerifier(address verifier) external onlyOwner {
+        _verifier = verifier;
+        emit VerifierSet(verifier);
     }
 
     /**
