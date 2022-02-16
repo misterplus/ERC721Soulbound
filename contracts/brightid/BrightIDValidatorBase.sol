@@ -4,7 +4,6 @@ pragma solidity ^0.8.11;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 abstract contract BrightIDValidatorBase is Ownable {
-
     // Address of trusted verifier
     address internal _verifier;
 

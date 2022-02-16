@@ -13,9 +13,7 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
     // Mapping keccak(UUID) to address
     mapping(bytes32 => address) internal _uuidToAddress;
 
-    constructor(address verifier, bytes32 context)
-        BrightIDValidatorBase(verifier, context)
-    {}
+    constructor(address verifier, bytes32 context) BrightIDValidatorBase(verifier, context) {}
 
     /**
      * @dev Bind an address to an UUID.
@@ -38,17 +36,9 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
         uint256 nonce,
         bytes calldata signature
     ) external {
-        require(
-            _uuidToAddress[uuidHash] == address(0),
-            "BrightIDRegistryOwnership: UUID already bound"
-        );
-        address signer = getUUIDHash(owner, uuidHash, nonce)
-            .toEthSignedMessageHash()
-            .recover(signature);
-        require(
-            signer != address(0) && signer == owner,
-            "BrightIDRegistryOwnership: Signature invalid"
-        );
+        require(_uuidToAddress[uuidHash] == address(0), "BrightIDRegistryOwnership: UUID already bound");
+        address signer = getUUIDHash(owner, uuidHash, nonce).toEthSignedMessageHash().recover(signature);
+        require(signer != address(0) && signer == owner, "BrightIDRegistryOwnership: Signature invalid");
         _uuidToAddress[uuidHash] = owner;
     }
 

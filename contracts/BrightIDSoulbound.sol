@@ -11,11 +11,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "./brightid/extensions/BrightIDValidatorOwnership.sol";
 
-contract BrightIDSoulbound is
-    Context,
-    ERC165,
-    BrightIDValidatorOwnership
-{
+contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
     using Address for address;
     using Strings for uint256;
     using ECDSA for bytes32;
@@ -95,20 +91,12 @@ contract BrightIDSoulbound is
         bytes32 r,
         bytes32 s
     ) internal view {
-        bytes32 message = keccak256(
-            abi.encodePacked(_context, contextIds, timestamp)
-        );
+        bytes32 message = keccak256(abi.encodePacked(_context, contextIds, timestamp));
         address signer = message.recover(v, r, s);
-        require(
-            _verifier == signer,
-            "BrightIDSoulbound: Signer not authorized"
-        );
+        require(_verifier == signer, "BrightIDSoulbound: Signer not authorized");
     }
 
-    function _lookup(
-        bytes32[] calldata contextIds,
-        uint256 tokenId
-    ) internal view returns (address from, address to) {
+    function _lookup(bytes32[] calldata contextIds, uint256 tokenId) internal view returns (address from, address to) {
         address owner = ownerOf(tokenId);
         to = _uuidToAddress[hashUUID(contextIds[0])];
         for (uint256 i = 1; i < contextIds.length; i++) {
@@ -123,13 +111,7 @@ contract BrightIDSoulbound is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC165)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
         return
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
@@ -139,33 +121,17 @@ contract BrightIDSoulbound is
     /**
      * @dev See {IERC721-balanceOf}.
      */
-    function balanceOf(address owner)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
-        require(
-            owner != address(0),
-            "BrightIDSoulbound: balance query for the zero address"
-        );
+    function balanceOf(address owner) public view virtual returns (uint256) {
+        require(owner != address(0), "BrightIDSoulbound: balance query for the zero address");
         return _balances[owner];
     }
 
     /**
      * @dev See {IERC721-ownerOf}.
      */
-    function ownerOf(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (address)
-    {
+    function ownerOf(uint256 tokenId) public view virtual returns (address) {
         address owner = _owners[tokenId];
-        require(
-            owner != address(0),
-            "BrightIDSoulbound: owner query for nonexistent token"
-        );
+        require(owner != address(0), "BrightIDSoulbound: owner query for nonexistent token");
         return owner;
     }
 
@@ -186,22 +152,11 @@ contract BrightIDSoulbound is
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        returns (string memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
+    function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
         string memory baseURI = _baseURI();
-        return
-            bytes(baseURI).length > 0
-                ? string(abi.encodePacked(baseURI, tokenId.toString()))
-                : "";
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
     }
 
     /**
@@ -299,10 +254,7 @@ contract BrightIDSoulbound is
      * Emits a {Transfer} event.
      */
     function _mint(address to, uint256 tokenId) internal virtual {
-        require(
-            to != address(0),
-            "BrightIDSoulbound: mint to the zero address"
-        );
+        require(to != address(0), "BrightIDSoulbound: mint to the zero address");
         require(!_exists(tokenId), "BrightIDSoulbound: token already minted");
 
         _beforeTokenTransfer(address(0), to, tokenId);
@@ -350,10 +302,7 @@ contract BrightIDSoulbound is
         address to,
         uint256 tokenId
     ) internal virtual {
-        require(
-            to != address(0),
-            "BrightIDSoulbound: transfer to the zero address"
-        );
+        require(to != address(0), "BrightIDSoulbound: transfer to the zero address");
 
         _beforeTokenTransfer(from, to, tokenId);
 
@@ -381,20 +330,11 @@ contract BrightIDSoulbound is
         bytes memory _data
     ) private returns (bool) {
         if (to.isContract()) {
-            try
-                IERC721Receiver(to).onERC721Received(
-                    _msgSender(),
-                    from,
-                    tokenId,
-                    _data
-                )
-            returns (bytes4 retval) {
+            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
                 return retval == IERC721Receiver.onERC721Received.selector;
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
-                    revert(
-                        "BrightIDSoulbound: transfer to non ERC721Receiver implementer"
-                    );
+                    revert("BrightIDSoulbound: transfer to non ERC721Receiver implementer");
                 } else {
                     assembly {
                         revert(add(32, reason), mload(reason))

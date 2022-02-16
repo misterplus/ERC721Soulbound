@@ -27,10 +27,7 @@ abstract contract BrightIDSoulboundSingleMint is BrightIDSoulbound {
         for (uint256 i = 0; i < contextIds.length; i++) {
             balance += BrightIDSoulbound.balanceOf(_uuidToAddress[hashUUID(contextIds[i])]);
         }
-        require(
-            balance == 0,
-            "BrightIDSoulboundSingleMint: This BrightID had minted"
-        );
+        require(balance == 0, "BrightIDSoulboundSingleMint: This BrightID had minted");
         _safeMint(_uuidToAddress[hashUUID(contextIds[0])], tokenId);
     }
 }
