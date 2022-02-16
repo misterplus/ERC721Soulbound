@@ -14,13 +14,26 @@ import "./brightid/extensions/BrightIDValidatorOwnership.sol";
 contract BrightIDSoulbound is
     Context,
     ERC165,
-    IERC721,
-    IERC721Metadata,
     BrightIDValidatorOwnership
 {
     using Address for address;
     using Strings for uint256;
     using ECDSA for bytes32;
+
+    /**
+     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+
+    /**
+     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.
+     */
+    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+
+    /**
+     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.
+     */
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
     // Token name
     string private _name;
@@ -114,7 +127,7 @@ contract BrightIDSoulbound is
         public
         view
         virtual
-        override(ERC165, IERC165)
+        override(ERC165)
         returns (bool)
     {
         return
@@ -130,7 +143,6 @@ contract BrightIDSoulbound is
         public
         view
         virtual
-        override
         returns (uint256)
     {
         require(
@@ -147,7 +159,6 @@ contract BrightIDSoulbound is
         public
         view
         virtual
-        override
         returns (address)
     {
         address owner = _owners[tokenId];
@@ -161,14 +172,14 @@ contract BrightIDSoulbound is
     /**
      * @dev See {IERC721Metadata-name}.
      */
-    function name() public view virtual override returns (string memory) {
+    function name() public view virtual returns (string memory) {
         return _name;
     }
 
     /**
      * @dev See {IERC721Metadata-symbol}.
      */
-    function symbol() public view virtual override returns (string memory) {
+    function symbol() public view virtual returns (string memory) {
         return _symbol;
     }
 
@@ -179,7 +190,6 @@ contract BrightIDSoulbound is
         public
         view
         virtual
-        override
         returns (string memory)
     {
         require(
@@ -415,82 +425,4 @@ contract BrightIDSoulbound is
         address to,
         uint256 tokenId
     ) internal virtual {}
-
-    /**
-     * @dev See {IERC721-approve}.
-     */
-    function approve(address to, uint256 tokenId) public virtual override {
-        revert();
-    }
-
-    /**
-     * @dev See {IERC721-getApproved}.
-     */
-    function getApproved(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (address)
-    {
-        return address(0);
-    }
-
-    /**
-     * @dev See {IERC721-setApprovalForAll}.
-     */
-    function setApprovalForAll(address operator, bool approved)
-        public
-        virtual
-        override
-    {
-        revert();
-    }
-
-    /**
-     * @dev See {IERC721-isApprovedForAll}.
-     */
-    function isApprovedForAll(address owner, address operator)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
-        return false;
-    }
-
-    /**
-     * @dev See {IERC721-transferFrom}.
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override {
-        revert();
-    }
-
-    /**
-     * @dev See {IERC721-safeTransferFrom}.
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) public virtual override {
-        revert();
-    }
-
-    /**
-     * @dev See {IERC721-safeTransferFrom}.
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public virtual override {
-        revert();
-    }
 }

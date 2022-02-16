@@ -8,7 +8,7 @@ module.exports = {
       provider: () => new HDWalletProvider(
         `${process.env.DEPLOYER_PRIVATE_KEY}`, `https://rinkeby.infura.io/v3/${process.env.INFURA_KEY}`),
       network_id: 4,
-      gas: 30000000,
+      gas: 29000000,
       confirmations: 2
     }
   },
@@ -23,5 +23,9 @@ module.exports = {
         }
       },
     },
-  }
+  },
+  
+  plugins: [
+    'truffle-plugin-stdjsonin'
+  ]
 }
