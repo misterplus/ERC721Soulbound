@@ -76,8 +76,11 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         bytes32 s
     ) external {
         require(
-            _contents[_verifications[_uuidToAddress[keccak256(abi.encodePacked(contextIds[0]))]]].time <
-                timestamp,
+            _contents[
+                _verifications[
+                    _uuidToAddress[keccak256(abi.encodePacked(contextIds[0]))]
+                ]
+            ].time < timestamp,
             "BrightIDRegistryOwnership: Newer verification registered before"
         );
 
