@@ -10,11 +10,8 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 contract BrightIDRegistryOwnership is BrightIDRegistryBase {
     using ECDSA for bytes32;
 
-    // Mapping UUID to address
-    mapping(bytes16 => address) internal _uuidToAddress;
-
-    // Mapping address to UUID
-    mapping(address => bytes16) internal _addressToUuid;
+    // Mapping keccak(UUID) to address
+    mapping(bytes32 => address) internal _uuidToAddress;
 
     constructor(address verifier, bytes32 context)
         BrightIDRegistryBase(verifier, context)
@@ -31,30 +28,28 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
      * - the signer of `signature` must be `owner`.
      *
      * @param owner Owner address of signature
-     * @param uuid Generated UUID
+     * @param uuidHash Keccak hash of generated UUID
      * @param nonce Generated nonce
      * @param signature Signed packed data
      */
     function bind(
         address owner,
-        bytes16 uuid,
+        bytes32 uuidHash,
         uint256 nonce,
         bytes calldata signature
     ) external {
         require(
-            _uuidToAddress[uuid] == address(0) &&
-                _addressToUuid[owner] == bytes16(0),
-            "BrightIDRegistryOwnership: UUID or address already bound"
+            _uuidToAddress[uuidHash] == address(0),
+            "BrightIDRegistryOwnership: UUID already bound"
         );
-        address signer = getUUIDHash(owner, uuid, nonce)
+        address signer = getUUIDHash(owner, uuidHash, nonce)
             .toEthSignedMessageHash()
             .recover(signature);
         require(
             signer != address(0) && signer == owner,
             "BrightIDRegistryOwnership: Signature invalid"
         );
-        _uuidToAddress[uuid] = owner;
-        _addressToUuid[owner] = uuid;
+        _uuidToAddress[uuidHash] = owner;
     }
 
     /**
@@ -74,14 +69,14 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
      * @param s Component of signature
      */
     function register(
-        bytes16[] calldata contextIds,
+        bytes32[] calldata contextIds,
         uint256 timestamp,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) external {
         require(
-            _contents[_verifications[_uuidToAddress[contextIds[0]]]].time <
+            _contents[_verifications[_uuidToAddress[keccak256(abi.encodePacked(contextIds[0]))]]].time <
                 timestamp,
             "BrightIDRegistryOwnership: Newer verification registered before"
         );
@@ -98,7 +93,7 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
         _contents[message].members = new address[](contextIds.length);
         address addr;
         for (uint256 i = 0; i < contextIds.length; i++) {
-            addr = _uuidToAddress[contextIds[i]];
+            addr = _uuidToAddress[keccak256(abi.encodePacked(contextIds[i]))];
             require(
                 addr != address(0),
                 "BrightIDRegistryOwnership: UUID not bound"
@@ -112,14 +107,14 @@ contract BrightIDRegistryOwnership is BrightIDRegistryBase {
      * @dev Constructs and returns a hash used by this registry implementation.
      *
      * @param owner Owner address of signature
-     * @param uuid Generated UUID
+     * @param uuidHash Keccak hash of generated UUID
      * @param nonce Generated nonce
      */
     function getUUIDHash(
         address owner,
-        bytes16 uuid,
+        bytes32 uuidHash,
         uint256 nonce
     ) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(owner, uuid, nonce));
+        return keccak256(abi.encodePacked(owner, uuidHash, nonce));
     }
 }
