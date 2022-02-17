@@ -72,6 +72,6 @@ abstract contract BrightIDValidatorBase is Ownable {
     ) internal view {
         bytes32 message = keccak256(abi.encodePacked(_context, contextIds, timestamp));
         address signer = message.recover(v, r, s);
-        require(_verifier == signer, "BrightIDSoulbound: Signer not authorized");
+        require(_verifier == signer, "BrightIDValidatorBase: Signer not authorized");
     }
 }
