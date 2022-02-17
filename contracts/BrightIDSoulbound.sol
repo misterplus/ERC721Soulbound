@@ -123,7 +123,7 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
      * @dev See {IERC721Metadata-tokenURI}.
      */
     function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
-        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        require(_exists(tokenId), "BrightIDSoulbound: URI query for nonexistent token");
 
         string memory baseURI = _baseURI();
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
@@ -144,7 +144,7 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
                 return (_uuidToAddress[hashUUID(contextIds[i])], _uuidToAddress[hashUUID(contextIds[0])]);
             }
         }
-        revert("BrightIDSoulbound: No token to rescue");
+        revert("BrightIDSoulbound: no token to rescue");
     }
 
     /**
