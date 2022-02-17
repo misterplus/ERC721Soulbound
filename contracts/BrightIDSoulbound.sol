@@ -20,16 +20,6 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
      */
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
 
-    /**
-     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.
-     */
-    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-
-    /**
-     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.
-     */
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-
     // Token name
     string private _name;
 
@@ -200,7 +190,7 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
     /**
      * @dev Returns whether `tokenId` exists.
      *
-     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
+     * Tokens can be managed by accounts linked to the same BrightID.
      *
      * Tokens start existing when they are minted (`_mint`),
      * and stop existing when they are burned (`_burn`).
