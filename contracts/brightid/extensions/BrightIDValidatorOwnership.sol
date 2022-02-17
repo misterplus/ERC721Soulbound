@@ -16,12 +16,11 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
     constructor(address verifier, bytes32 context) BrightIDValidatorBase(verifier, context) {}
 
     /**
-     * @dev Bind an address to an UUID.
+     * @dev Bind an UUID to an address.
      *
      * Requirements:
      *
-     * - `uuid` must be not bound.
-     * - `owner` must be not bound.
+     * - `uuidHash` must be not bound.
      * - `signature` must be a valid ETH signed signature.
      * - the signer of `signature` must be `owner`.
      *
@@ -36,16 +35,16 @@ contract BrightIDValidatorOwnership is BrightIDValidatorBase {
         uint256 nonce,
         bytes calldata signature
     ) external {
-        require(_uuidToAddress[uuidHash] == address(0), "BrightIDRegistryOwnership: UUID already bound");
+        require(_uuidToAddress[uuidHash] == address(0), "BrightIDValidatorOwnership: UUID already bound");
         address signer = getUUIDHash(owner, uuidHash, nonce).toEthSignedMessageHash().recover(signature);
-        require(signer != address(0) && signer == owner, "BrightIDRegistryOwnership: Signature invalid");
+        require(signer != address(0) && signer == owner, "BrightIDValidatorOwnership: Signature invalid");
         _uuidToAddress[uuidHash] = owner;
     }
 
     /**
      * @dev Returns a hashed UUID
      *
-     * @param uuid Generated UUID
+     * @param uuid Hex encoded generated UUID
      */
     function hashUUID(bytes32 uuid) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(uuid));

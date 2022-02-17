@@ -14,7 +14,6 @@ import "./brightid/extensions/BrightIDValidatorOwnership.sol";
 contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
     using Address for address;
     using Strings for uint256;
-    using ECDSA for bytes32;
 
     /**
      * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
@@ -56,6 +55,9 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
         _symbol = symbol_;
     }
 
+    /**
+     * @dev Rescue the token `tokenId` without control of the owner address.
+     */
     function rescue(
         bytes32[] calldata contextIds,
         uint256 timestamp,
@@ -63,10 +65,13 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external {
+    ) public {
         rescue(contextIds, timestamp, tokenId, v, r, s, "");
     }
 
+    /**
+     * @dev See {BrightIDSoulbound-rescue}.
+     */
     function rescue(
         bytes32[] calldata contextIds,
         uint256 timestamp,
@@ -80,32 +85,7 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
         address from;
         address to;
         (from, to) = _lookup(contextIds, tokenId);
-        require(from != address(0), "BrightIDSoulbound: No token to rescue");
         _safeTransfer(from, to, tokenId, data);
-    }
-
-    function _validate(
-        bytes32[] calldata contextIds,
-        uint256 timestamp,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal view {
-        bytes32 message = keccak256(abi.encodePacked(_context, contextIds, timestamp));
-        address signer = message.recover(v, r, s);
-        require(_verifier == signer, "BrightIDSoulbound: Signer not authorized");
-    }
-
-    function _lookup(bytes32[] calldata contextIds, uint256 tokenId) internal view returns (address from, address to) {
-        address owner = ownerOf(tokenId);
-        to = _uuidToAddress[hashUUID(contextIds[0])];
-        for (uint256 i = 1; i < contextIds.length; i++) {
-            if (owner == _uuidToAddress[hashUUID(contextIds[i])]) {
-                from = _uuidToAddress[hashUUID(contextIds[i])];
-                return (from, to);
-            }
-        }
-        return (address(0), to);
     }
 
     /**
@@ -157,6 +137,24 @@ contract BrightIDSoulbound is Context, ERC165, BrightIDValidatorOwnership {
 
         string memory baseURI = _baseURI();
         return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
+    }
+
+    /**
+     * @dev Lookup an address tuple used for transferring token `tokenId`.
+     *
+     * Requirements:
+     *
+     * - length of `contextIds` must be greater than 1.
+     * - at least one element in `contextIds` resolves to the owner address of token `tokenId`.
+     */
+    function _lookup(bytes32[] calldata contextIds, uint256 tokenId) internal view returns (address, address) {
+        address owner = ownerOf(tokenId);
+        for (uint256 i = 1; i < contextIds.length; i++) {
+            if (owner == _uuidToAddress[hashUUID(contextIds[i])]) {
+                return (_uuidToAddress[hashUUID(contextIds[i])], _uuidToAddress[hashUUID(contextIds[0])]);
+            }
+        }
+        revert("BrightIDSoulbound: No token to rescue");
     }
 
     /**

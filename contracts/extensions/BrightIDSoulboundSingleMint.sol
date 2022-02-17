@@ -7,7 +7,7 @@ abstract contract BrightIDSoulboundSingleMint is BrightIDSoulbound {
     /**
      * @dev Creates a new token for the caller.
      *
-     * See {ERC721-_mint}.
+     * See {BrightIDSoulbound-_mint}.
      *
      * Requirements:
      *
